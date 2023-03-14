@@ -6,7 +6,10 @@ spec:
   group: aws.starter.org
   names:
     kind: XS3
-    plural: xs3
+    plural: xs3s
+  claimNames:
+    kind: S3
+    plural: s3s
   versions:
     - name: v1alpha1
       served: true

@@ -1,28 +1,35 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: xs3.aws.starter.org
+  name: buckets.s3.aws.k8s.starter.org
   labels:
-    plan: full
+    crossplane.io/xrd: xbuckets.s3.aws.k8s.starter.org
     provider: aws
 spec:
-  writeConnectionSecretsToNamespace: upbound-system
   compositeTypeRef:
-    apiVersion: aws.starter.org/v1alpha1
-    kind: XS3
+    apiVersion: s3.aws.k8s.starter.org/v1alpha1
+    kind: XBucket
+  patchSets:
+    - name: deletionPolicyPatches
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.deletionPolicy
+          toFieldPath: spec.deletionPolicy
+    - name: providerPatches
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.providerConfigRef
+          toFieldPath: spec.providerConfigRef.name
   resources:
-    - name: bucket
+    - name: Bucket
       base:
         apiVersion: s3.aws.upbound.io/v1beta1
         kind: Bucket
-        spec: 
-          forProvider:
-            forceDestroy: true
-            region: eu-north-1
       patches:
-        - fromFieldPath: metadata.labels
-          toFieldPath: metadata.labels
-        - fromFieldPath: metadata.annotations
-          toFieldPath: metadata.annotations
-        - fromFieldPath: spec.providerConfigRef.name
-          toFieldPath: spec.providerConfigRef.name
+        - type: PatchSet
+          patchSetName: providerPatches
+        - type: PatchSet
+          patchSetName: deletionPolicyPatches
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.region
+          toFieldPath: spec.forProvider.region

@@ -1,15 +1,17 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xs3.aws.starter.org
+  name: xbuckets.s3.aws.ucp.volvocars.biz
 spec:
-  group: aws.starter.org
+  group: s3.aws.ucp.volvocars.biz
   names:
-    kind: XS3
-    plural: xs3s
+    kind: XBucket
+    plural: xbuckets
   claimNames:
-    kind: S3
-    plural: s3s
+    kind: Bucket
+    plural: buckets
+  defaultCompositionRef:
+    name: buckets.s3.aws.ucp.volvocars.biz
   versions:
     - name: v1alpha1
       served: true
@@ -21,19 +23,19 @@ spec:
             spec:
               type: object
               properties:
-                providerConfigRef:
+                parameters:
                   type: object
-                  description:
-                    "A reference to the ProviderConfig of the cluster that services should
-                    be deployed to."
                   properties:
-                    name:
+                    region:
                       type: string
-                      description:
-                        "Name of the Kubernetes provider configuration.
-                        This will typically be the name of the cluster with a
-                        five character suffix appended."
-                  required:
-                    - name
+                      description: Geographic location of this S3 bucket.
+                    providerConfigRef:
+                      type: string
+                      description: Crossplane provider credentials to use.
+                      default: default
+                    deletionPolicy:
+                      type: string
+                      default: Delete
+                      description: DeletionPolicy specifies what will happen to the underlying external when this managed resource is deleted - either "Delete" or "Orphan" the external resource.
               required:
-                - providerConfigRef
+                - parameters
